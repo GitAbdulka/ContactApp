@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/mainScreen">
+
+    <fragment
+        android:id="@+id/mainScreen"
+        android:name="com.example.mycontactapp2.MainScreen"
+        android:label="MainScreen"
+        tools:layout="@layout/screen_main"
+        >
+        <action
+            android:id="@+id/action_mainScreen_to_addScreen"
+            app:destination="@id/addScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/addScreen"
+        android:name="com.example.mycontactapp2.AddScreen"
+        android:label="AddScreen"
+        tools:layout="@layout/screen_add"
+        />
+</navigation>
