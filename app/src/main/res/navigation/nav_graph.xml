@@ -20,5 +20,10 @@
         android:name="com.example.mycontactapp2.AddScreen"
         android:label="AddScreen"
         tools:layout="@layout/screen_add"
-        />
+        >
+        <argument
+            android:name="contact"
+            app:argType="com.example.mycontactapp2.room.Contact"
+            app:nullable="true" />
+    </fragment>
 </navigation>

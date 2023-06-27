@@ -20,4 +20,10 @@ interface ContactDao {
 
     @Query("SELECT * FROM contacts WHERE name LIKE :name")
     fun findContactWithName(name: String): List<Contact>
+
+    @Update
+    fun updateContact(contact: Contact)
+
+    @Query("DELETE FROM contacts")
+    fun deleteAll()
 }
