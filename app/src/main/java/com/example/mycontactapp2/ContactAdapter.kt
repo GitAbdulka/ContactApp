@@ -1,19 +1,19 @@
 package com.example.mycontactapp2
 
+import android.content.Intent
+import android.net.Uri
+import android.os.Build
+import android.text.Html
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mycontactapp2.databinding.ItemContactBinding
 import com.example.mycontactapp2.room.Contact
-import com.example.mycontactapp2.room.ContactDao
 
 
 class ContactAdapter() : RecyclerView.Adapter<ContactAdapter.ContactViewHolder>() {
-
-    private lateinit var dao: ContactDao
-
-    var checkedContactId = mutableListOf<Int>()
 
     var contacts = mutableListOf<Contact>()
         set(value) {
@@ -24,47 +24,49 @@ class ContactAdapter() : RecyclerView.Adapter<ContactAdapter.ContactViewHolder>(
 
     inner class ContactViewHolder(private val binding: ItemContactBinding) :
         RecyclerView.ViewHolder(binding.root) {
+        @RequiresApi(Build.VERSION_CODES.N)
         fun bind(item: Contact) {
             binding.apply {
                 tvContactName.text = item.contactName
                 tvContactPhone.text = item.phoneNumber
-                imgPhone.setOnClickListener {
-                    deleteBtnClicked.invoke(item)
-                }
+                imgCheck.isVisible = item.state == 1
                 root.setOnLongClickListener {
                     imgCheck.isVisible = true
-                    checkedContactId.add(it.id)
-                    observer.invoke(Unit)
+                    observerAdd.invoke(item)
                     true
                 }
 
                 root.setOnClickListener {
-                    checkedContactId.forEach {
-                        if (item.id == it) {
-                            checkedContactId.remove(item.id)
-                            imgCheck.isVisible = false
-                            observer.invoke(Unit)
-                        }
-                    }
+                    imgCheck.isVisible = false
+                    observerRemove.invoke(item)
                 }
 
                 btnEdit.setOnClickListener {
                     editBtnClicked.invoke(item)
                 }
+
+                btnCall.setOnClickListener {
+                    val phoneNumber = item.phoneNumber
+                    val callIntent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:$phoneNumber"))
+                    itemView.context.startActivity(callIntent)
+                }
             }
         }
     }
 
-    var deleteBtnClicked: (contact: Contact) -> Unit = {}
-
-    fun deleteBtnClicked(block: (Contact) -> Unit) {
-        deleteBtnClicked = block
+    var observerAdd: (Contact) -> Unit = {}
+    fun observerAdd(block: (Contact) -> Unit) {
+        observerAdd = block
     }
 
-    var observer: (Unit) -> Unit = {}
+    var observerRemove: (Contact) -> Unit = {}
+    fun observerRemove(block: (Contact) -> Unit) {
+        observerRemove = block
+    }
 
-    fun observer(block: (Unit) -> Unit) {
-        observer = block
+    var deleteBtnClicked: (contact: Contact) -> Unit = {}
+    fun deleteBtnClicked(block: (Contact) -> Unit) {
+        deleteBtnClicked = block
     }
 
     var editBtnClicked: (contact: Contact) -> Unit = {}

@@ -21,6 +21,7 @@ class AddScreen : Fragment(R.layout.screen_add) {
         super.onViewCreated(view, savedInstanceState)
         binding = ScreenAddBinding.bind(view)
         dao = ContactDatabase.getDatabase(requireContext()).contactDao()
+
         binding.apply {
             btnBack.setOnClickListener {
                 findNavController().popBackStack()
@@ -54,7 +55,8 @@ class AddScreen : Fragment(R.layout.screen_add) {
                             id = 0,
                             contactName = name,
                             surname = surname,
-                            phoneNumber = phone
+                            phoneNumber = phone,
+                            state = 0
                         )
                     )
                 }

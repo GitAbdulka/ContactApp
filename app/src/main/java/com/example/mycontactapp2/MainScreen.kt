@@ -7,6 +7,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.mycontactapp2.databinding.ScreenMainBinding
+import com.example.mycontactapp2.room.Contact
 import com.example.mycontactapp2.room.ContactDao
 import com.example.mycontactapp2.room.ContactDatabase
 
@@ -23,19 +24,50 @@ class MainScreen : Fragment(R.layout.screen_main) {
         binding.rvContacts.adapter = adapter
         dao = ContactDatabase.getDatabase(requireContext()).contactDao()
 
+        updateToolbarState()
 
         binding.btnAdd.setOnClickListener {
             val action = MainScreenDirections.actionMainScreenToAddScreen(null)
             findNavController().navigate(action)
         }
 
+        binding.ivClose.setOnClickListener {
+            dao.getMyAllContacts().forEach { contact ->
+                if (contact.state == 1) {
+                    dao.updateContact(
+                        Contact(
+                            contact.id,
+                            contactName = contact.contactName,
+                            surname = contact.surname,
+                            phoneNumber = contact.phoneNumber,
+                            state = 0
+                        )
+                    )
+                }
+            }
+            binding.ivClose.isVisible = false
+            binding.title.text = "Contacts"
+            setData()
+            adapter.notifyDataSetChanged()
+        }
+
         binding.editQuery.doAfterTextChanged {
             adapter.contacts = dao.findContactWithName("$it%").toMutableList()
         }
 
-        binding.more.setOnClickListener {
-            dao.deleteAll()
-            setData()
+        binding.deleteAll.setOnClickListener {
+            var isDeleteAll = true
+            dao.getMyAllContacts().forEachIndexed { index, contact ->
+                if (contact.state == 1) {
+                    isDeleteAll = false
+                    dao.deleteContact(contact.id)
+                }
+                if (index == dao.getMyAllContacts().size - 1 && isDeleteAll) {
+                    dao.deleteAll()
+                }
+            }
+            updateToolbarState()
+            setData()                          
         }
 
         adapter.deleteBtnClicked {
@@ -51,16 +83,71 @@ class MainScreen : Fragment(R.layout.screen_main) {
             findNavController().navigate(action)
         }
 
-        adapter.observer {
-            if(adapter.checkedContactId.isNotEmpty()){
+        adapter.observerAdd { contact ->
+            dao.updateContact(
+                Contact(
+                    contact.id,
+                    contactName = contact.contactName,
+                    surname = contact.surname,
+                    phoneNumber = contact.phoneNumber,
+                    state = 1
+                )
+            )
+            var count = 0
+            dao.getMyAllContacts().forEach { contact ->
+                if (contact.state == 1) {
+                    count++
+                }
+            }
+            if (count != 0) {
                 binding.ivClose.isVisible = true
-                binding.title.text = adapter.checkedContactId.count().toString()
+                binding.title.text = count.toString()
+            } else {
+                binding.ivClose.isVisible = false
+                binding.title.text = "Contacts"
+            }
+        }
+
+        adapter.observerRemove { contact ->
+            dao.updateContact(
+                Contact(
+                    contact.id,
+                    contactName = contact.contactName,
+                    surname = contact.surname,
+                    phoneNumber = contact.phoneNumber,
+                    state = 0
+                )
+            )
+            var count = 0
+            dao.getMyAllContacts().forEach { contact ->
+                if (contact.state == 1) {
+                    count++
+                }
+            }
+            if (count != 0) {
+                binding.ivClose.isVisible = true
+                binding.title.text = count.toString()
+            } else {
+                binding.ivClose.isVisible = false
+                binding.title.text = "Contacts"
             }
         }
 
         setData()
     }
-
+    fun updateToolbarState() {
+        var count = 0
+        dao.getMyAllContacts().forEach { contact ->
+            if (contact.state == 1) count++
+        }
+        if (count != 0) {
+            binding.ivClose.isVisible = true
+            binding.title.text = count.toString()
+        } else {
+            binding.ivClose.isVisible = false
+            binding.title.text = "Contacts"
+        }
+    }
     private fun setData() {
         adapter.contacts = dao.getMyAllContacts().toMutableList()
     }

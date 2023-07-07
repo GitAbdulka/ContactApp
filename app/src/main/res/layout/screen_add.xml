@@ -107,6 +107,10 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/et_phone"
+                android:inputType="phone"
+                android:maxLength="17"
+                android:textAlignment="viewStart"
+                android:textColorHint="#918D8D"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
